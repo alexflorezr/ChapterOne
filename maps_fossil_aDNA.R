@@ -1,7 +1,7 @@
 ##############################
 ### Read the full database ###
 ##############################
-
+rm(list=ls())
 Full_DB <- read.delim(file.choose(), header=T, stringsAsFactors=F)
 Full_DB$Longitude <- as.numeric(Full_DB$Longitude)
 Full_DB$Latitude <- as.numeric(Full_DB$Latitude)
@@ -13,6 +13,8 @@ for (i in seq_along(Full_DB$Latitude)){
 }
 # remove the records without longitude and or latitude
 Full_DB_LL <- Full_DB[-full_vector,]
+# remove the records older than 50000 years
+Full_DB_LL <- Full_DB_LL[-which(Full_DB_LL$Median_Age > 50000),]
 # add two empty colums to assign color and type of point in the map
 For_map <- matrix(NA,nrow=length(Full_DB_LL$Latitude), ncol=2)
 colnames(For_map) <- c("Map_color", "Map_type")
@@ -34,14 +36,24 @@ for (k in seq_along(Full_DB_map[,1])){
         Full_DB_map$Map_color[k] <- points_table[j,1]
     }
     if (length(strsplit(Full_DB_map$Sequence[k], split="")[[1]]) > 1){
-        Full_DB_map$Map_type[k] <- 16
+        Full_DB_map$Map_type[k] <- 24
     }
     if (length(strsplit(Full_DB_map$Sequence[k], split="")[[1]]) <= 1){
         Full_DB_map$Map_type[k] <- 21
     }
   }
 }
-points(Full_DB_map$Longitude, Full_DB_map$Latitude, col=Full_DB_map$Map_color, cex=1.5, pch=Full_DB_map$Map_type, bg=paste(Full_DB_map$Map_color, 90, sep=""))
+points(Full_DB_map$Longitude, Full_DB_map$Latitude, col=Full_DB_map$Map_color, cex=1, pch=Full_DB_map$Map_type, bg=paste(Full_DB_map$Map_color, 90, sep=""))
+##############################
+### maps: one  per  species###
+##############################
+Single_sp <- unique(Full_DB_LL$Species)
+for (s in Single_sp){
+  newmap <- getMap(resolution = "low")
+  plot(newmap, xlim = c(-180, 180), ylim = c(0,90), asp=1, main=paste(s, ", n = ", sum(Full_DB_map$Species == s), sep=""))
+  points(Full_DB_map$Longitude[Full_DB_map$Species == s], Full_DB_map$Latitude[Full_DB_map$Species == s], col=Full_DB_map$Map_color[Full_DB_map$Species == s], cex=1, pch=Full_DB_map$Map_type[Full_DB_map$Species == s], bg=paste(Full_DB_map$Map_color[Full_DB_map$Species == s], 90, sep="")) 
+}
 
+s <- Single_sp[1]
 
 ############Delete above this line #####
