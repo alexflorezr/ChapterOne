@@ -50,10 +50,7 @@ points(Full_DB_map$Longitude, Full_DB_map$Latitude, col=Full_DB_map$Map_color, c
 Single_sp <- unique(Full_DB_LL$Species)
 for (s in Single_sp){
   newmap <- getMap(resolution = "low")
-  plot(newmap, xlim = c(-180, 180), ylim = c(0,90), asp=1, main=paste(s, ", n = ", sum(Full_DB_map$Species == s), sep=""))
+  plot(newmap, xlim = c(-180, 180), ylim = c(0,90), asp=1, main=paste(s, ": fossil (n = ", sum( Full_DB_map$Map_type[Full_DB_map$Species == s] == 21),")", ", aDNA (n = ",sum(Full_DB_map$Map_type[Full_DB_map$Species == s] == 24), ")", sep=""), )
   points(Full_DB_map$Longitude[Full_DB_map$Species == s], Full_DB_map$Latitude[Full_DB_map$Species == s], col=Full_DB_map$Map_color[Full_DB_map$Species == s], cex=1, pch=Full_DB_map$Map_type[Full_DB_map$Species == s], bg=paste(Full_DB_map$Map_color[Full_DB_map$Species == s], 90, sep="")) 
 }
-
-s <- Single_sp[1]
-
 ############Delete above this line #####
