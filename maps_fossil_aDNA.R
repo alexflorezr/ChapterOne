@@ -39,7 +39,7 @@ for (k in seq_along(Full_DB_map[,1])){
       Full_DB_map[k,map_colums]  <- c(points_table[j,1], 24)
       }
       if (nchar(Full_DB_map$Sequence[k]) < 2){
-        Full_DB_map[k,map_colums]  <- c(points_table[j,1], 21))
+        Full_DB_map[k,map_colums]  <- c(points_table[j,1], 21)
       }
     }
 }
