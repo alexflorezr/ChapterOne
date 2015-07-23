@@ -1,3 +1,4 @@
+Working perfectly on the iMac
 ##############################
 ### Read the full database ###
 ##############################
@@ -35,10 +36,10 @@ for (k in seq_along(Full_DB_map[,1])){
     if (Full_DB_map$Median_Age[k] <= as.numeric(points_table[j,2]) && Full_DB_map$Median_Age[k] >= as.numeric(points_table[j,2])-5000){
         Full_DB_map$Map_color[k] <- points_table[j,1]
     }
-    if (length(strsplit(Full_DB_map$Sequence[k], split="")[[1]]) > 1){
+    if (nchar(Full_DB_map$Sequence[k]) > 1){
         Full_DB_map$Map_type[k] <- 24
     }
-    if (length(strsplit(Full_DB_map$Sequence[k], split="")[[1]]) <= 1){
+    if (nchar(Full_DB_map$Sequence[k]) <= 1){
         Full_DB_map$Map_type[k] <- 21
     }
   }
