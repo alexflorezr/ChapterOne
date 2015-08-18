@@ -2,29 +2,26 @@
 # Climate velocity ## WORKING, MAKE PLOT FOR ALL THE 4 SPECIES
 #####################
 library(raster)
-setwd("/Users/afr/Desktop/Evolution_ppt/Paleo_cc_velocity/")
+# Upload the climate velocity files
+setwd("/Users/afr/Desktop/CHECK/Ditte_files/Velocity/paleo_cc_velocity/")
 velocity_map_year <- stack("climate_change_velocity_perYear_tmp_prec_rescaled_everyKyrs_truncated_0_00005.grd")
 # Define the directory where the files
 setwd("/Users/afr/Desktop/Evolution_ppt/Corr_result/")
-# Read the table with the species information 
-##### Species_info <- read.delim("species_info.txt", header = T, sep="\t", stringsAsFactors=F)
-#Create a grid for the graphs
-##### par(mar=c(2,2,1,2), mfrow=c(2,5))
-#### Loop throughout the species to extract the velocity values per time bin for every record####
-
-species_vector <- c("Mammuthus_primigenius", "Bison_bison", "Coelodonta_antiquitatis", "Ovibos_moschatus")
-#species_vector <- c("Mammuthus_primigenius")
-for (s in seq_along(species_vector)){
-  temp_db <- Full_DB_LL[Full_DB_LL$Species == species_vector[s],]
-  temp_points <- as.data.frame(matrix(nrow=nrow(temp_db), ncol=7))
+image_climate <- matrix(NA,ncol=37, nrow=21)
+colnames(image_climate) <- c( seq(0, 21000, by=1000), seq(22000, 50000, by=2000))
+rownames(image_climate) <- Single_sp
+image_climate_rank <- image_climate
+for (s in seq_along(Single_sp)){
+  temp_DB_climate <- Full_DB_LL[which(Full_DB_LL$Species==Single_sp[s]),]
+  temp_points <- as.data.frame(matrix(nrow=nrow(temp_DB_climate), ncol=7))
   colnames(temp_points) <- c("Longitude", "Latitude", "Time_sample", "Time_bin", "Layer", "cell","Velocity")
   matrix_time <- matrix("numeric", nrow=38, ncol=2 )
   matrix_time[,1] <- c(seq(50000, 22000, by=-2000), seq(21000, -1000, by=-1000))
   matrix_time[,2] <- seq(25, 62, by=1)
-  for(i in seq_along(temp_db$Median_Age)){ # Takes longitude and latitude for data older than 5000 years and send it into a point matrix
+  for(i in seq_along(temp_DB_climate$Median_Age)){
     for (j in 1:(dim(matrix_time)[1]-1)){
-      if(temp_db$Median_Age[i]<= as.numeric(matrix_time[j]) & temp_db$Median_Age[i]> as.numeric(matrix_time[j+1])){
-        temp_points[i,c(1,2,3,4,5)] <- c(temp_db$Longitude[i], temp_db$Latitude[i],temp_db$Median_Age[i], matrix_time[j,1], matrix_time[j,2] )
+      if(temp_DB_climate$Median_Age[i]<= as.numeric(matrix_time[j]) & temp_DB_climate$Median_Age[i]> as.numeric(matrix_time[j+1])){
+        temp_points[i,c(1,2,3,4,5)] <- c(temp_DB_climate$Longitude[i], temp_DB_climate$Latitude[i],temp_DB_climate$Median_Age[i], matrix_time[j,1], matrix_time[j,2] )
       }
     }
   }
@@ -37,24 +34,50 @@ for (s in seq_along(species_vector)){
   # Check point
   sort(as.numeric(points_plot$Time_bin))
   # Save the velocity values for every species
-  setwd("/Users/afr/Desktop/Evolution_ppt/Corr_result/")
-  write.table(x=temp_points, file=paste(tolower(species_vector[s]), "_vel_bin.txt", sep=""), sep="\t",row.names=F)
-  species_sp <- paste(strsplit(strsplit(tolower(species_vector[s]), split = "_")[[1]][1], split = "")[[1]][1], strsplit(strsplit(tolower(species_vector[s]), split = "_")[[1]][2], split = "")[[1]][1], sep="")
-  ### Plot velocity profile per time bin
-  setwd("/Users/afr/Desktop/Evolution_ppt")
-  bsp_raw <- na.omit(read.delim(paste(species_sp, "_BSP_50_data.txt", sep=""), header=T, stringsAsFactors=F, sep="\t"))
-  #bsp_raw <- na.omit(read.delim(paste(species_vector[s], "_BSP_50_data.txt", sep=""), header=T, stringsAsFactors=F, sep="\t"))
-  plot(bsp_raw$Time, log(bsp_raw$Median), main=species_vector[s], ylim=c(4,16), lwd=3, type="l",frame.plot=F, lab=c(10,10,5), ylab="Population size", xlab="", col="#008B45", cex=0.5, xaxt="n")
-  #lines(bsp_raw$Time, log(bsp_raw$Mean), lty=2)
-  par(new=TRUE)
-  bp <- boxplot(points_plot$Velocity ~ as.numeric(points_plot$Time_bin), border="#EE760095", boxwex=.7, col="#EE760095", at=tick/1000, las=2, yaxt="n", frame=F, xaxt="n",  cex=0.5, xlim=c(0,50))
-  tick_labels <- c(0, rep(NA, 4), 5000, rep(NA, 4), 10000, rep(NA, 4), 15000, rep(NA, 4), 20000, rep(NA, 4), 25000, rep(NA, 4), 30000, rep(NA, 4), 35000, rep(NA, 4), 40000, rep(NA, 4), 45000, rep(NA, 4), 50000)
-  axis(side=1, at=seq(0, 50, by=1), labels=tick_labels, las=2, cex=0.5)
-  axis(side=4, at=seq(0, 1, by=0.2), cex=0.5)
-  #mtext("Velocity", side=4, line=3, cex.lab=1, col="red")
-  #text(tick/1000, rep(-0.001, length(tick)) ,labels=as.character(bp$n), cex=0.4)
-  lines(as.numeric(bp$names)/1000, bp$stats[3,], col="#EE7600", lwd=2)
-#}
+### setwd("/Users/afr/Desktop/kk_temp/")
+### write.table(x=temp_points, file=paste(tolower(Single_sp[s]), "_vel_bin.txt", sep=""), sep="\t",row.names=F)
+### species_sp <- paste(strsplit(strsplit(tolower(Single_sp[s]), split = "_")[[1]][1], split = "")[[1]][1], strsplit(strsplit(tolower(Single_sp[s]), split = "_")[[1]][2], split = "")[[1]][1], sep="")
+### bp <- boxplot(points_plot$Velocity ~ as.numeric(points_plot$Time_bin), main=Single_sp[s], border="#EE760095", boxwex=.7, col="#EE760095", at=tick/1000, las=2, yaxt="n", frame=F, xaxt="n",  cex=0.5, xlim=c(0,50))
+### tick_labels <- c(0, rep(NA, 4), 5000, rep(NA, 4), 10000, rep(NA, 4), 15000, rep(NA, 4), 20000, rep(NA, 4), 25000, rep(NA, 4), 30000, rep(NA, 4), 35000, rep(NA, 4), 40000, rep(NA, 4), 45000, rep(NA, 4), 50000)
+### axis(side=1, at=seq(0, 50, by=1), labels=tick_labels, las=2, cex=0.5)
+### axis(side=4, at=seq(0, 1, by=0.2), cex=0.5)
+### lines(as.numeric(bp$names)/1000, bp$stats[3,], col="#EE7600", lwd=2)
+  image_climate[s,as.vector(na.omit(match(bp$names, colnames(image_climate))))] <- bp$stats[3,]
+  image_climate_rank[s,as.vector(na.omit(match(bp$names, colnames(image_climate))))] <- rank(bp$stats[3,])
+}
+
+
+colores <- colorRampPalette(c("#C6E2FF", "#63B8FF", "#1E90FF", "#7B68EE", "#D15FEE", "#FF69B4", "#EE3A8C", "#FF0000"))(38)
+par(mar=c(4,10.5,4,4))
+#image(t(image_climate), col=paste(colores, 90, sep=""), axes=F)
+image(t(image_climate_rank), axes=F, col=paste(colores, 99, sep=""))
+axis(1, at=(seq(0,1,by=1/36)), labels=colnames(image_climate_rank), las=2)
+axis(2, at=(seq(0,1,by=1/20)), labels=rownames(image_climate_rank), las=2)
+#axis(4, at=(seq(0,1,by=1/20)), labels=rowsum(image_climate_rank, ), las=2)
+for (x in 1:ncol(image_climate_rank)){
+  for (y in 1:nrow(image_climate_rank)){
+    extemes<- c(max(t(image_climate_rank)[,y], na.rm=T), min(t(image_climate_rank)[,y], na.rm=T))
+    text((x-1)/36, (y-1)/20, t(image_climate_rank)[x,y], cex=ifelse(is.na(sum(match(t(image_climate_rank)[x,y],extemes))),0.5, 1.3))
+    #print(sum(match(t(image_climate_rank)[x,y],extemes)))
+  }
+}
+
+
+##############################
+### Alex: Correlate to BSP ###
+##############################
+
+### Plot velocity profile per time bin
+#setwd("/Users/afr/Desktop/Evolution_ppt")
+#bsp_raw <- na.omit(read.delim(paste(species_sp, "_BSP_50_data.txt", sep=""), header=T, stringsAsFactors=F, sep="\t"))
+#bsp_raw <- na.omit(read.delim(paste(species_vector[s], "_BSP_50_data.txt", sep=""), header=T, stringsAsFactors=F, sep="\t"))
+#plot(bsp_raw$Time, log(bsp_raw$Median), main=species_vector[s], ylim=c(4,16), lwd=3, type="l",frame.plot=F, lab=c(10,10,5), ylab="Population size", xlab="", col="#008B45", cex=0.5, xaxt="n")
+#lines(bsp_raw$Time, log(bsp_raw$Mean), lty=2)
+#par(new=TRUE)
+
+
+
+
 
 temp_time_bsp <- as.data.frame(matrix("numeric", nrow=37, ncol=3), stringsAsFactors=F)
 colnames(temp_time_bsp) <- c("Time_bin", "Average_popSize", "Slope")
