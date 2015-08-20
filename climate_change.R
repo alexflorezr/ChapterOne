@@ -11,6 +11,7 @@ image_climate <- matrix(NA,ncol=37, nrow=21)
 colnames(image_climate) <- c( seq(0, 21000, by=1000), seq(22000, 50000, by=2000))
 rownames(image_climate) <- Single_sp
 image_climate_rank <- image_climate
+image_climate_n <- image_climate
 for (s in seq_along(Single_sp)){
   temp_DB_climate <- Full_DB_LL[which(Full_DB_LL$Species==Single_sp[s]),]
   temp_points <- as.data.frame(matrix(nrow=nrow(temp_DB_climate), ncol=7))
@@ -41,23 +42,34 @@ bp <- boxplot(points_plot$Velocity ~ as.numeric(points_plot$Time_bin), main=Sing
 tick_labels <- c(0, rep(NA, 4), 5000, rep(NA, 4), 10000, rep(NA, 4), 15000, rep(NA, 4), 20000, rep(NA, 4), 25000, rep(NA, 4), 30000, rep(NA, 4), 35000, rep(NA, 4), 40000, rep(NA, 4), 45000, rep(NA, 4), 50000)
  axis(side=1, at=seq(0, 50, by=1), labels=tick_labels, las=2, cex=0.5)
  axis(side=4, at=seq(0, 1, by=0.2), cex=0.5)
- lines(as.numeric(bp$names)/1000, bp$stats[3,], col="#EE7600", lwd=2)
+lines(as.numeric(bp$names)/1000, bp$stats[1,], col="red", lwd=2)
+lines(as.numeric(bp$names)/1000, bp$stats[2,], col="pink", lwd=2)
+ lines(as.numeric(bp$names)/1000, bp$stats[3,], col="grey", lwd=2)
+lines(as.numeric(bp$names)/1000, bp$stats[4,], col="lightblue", lwd=2)
+lines(as.numeric(bp$names)/1000, bp$stats[5,], col="green", lwd=2)
   image_climate[s,as.vector(na.omit(match(bp$names, colnames(image_climate))))] <- bp$stats[3,]
   image_climate_rank[s,as.vector(na.omit(match(bp$names, colnames(image_climate))))] <- rank(bp$stats[3,])
+  image_climate_n[s,as.vector(na.omit(match(bp$names, colnames(image_climate))))] <- bp$n                                                                                    
 }
 
 library(SDMTools)
-colores <- colorRampPalette(c("#C6E2FF", "#63B8FF", "#1E90FF", "#7B68EE", "#D15FEE", "#FF69B4", "#EE3A8C", "#FF0000"))(38)
-par(mar=c(5,12,4,4))
-image(log(t(image_climate)), col=paste(colores, 90, sep=""), axes=F)
+colores <- colorRampPalette(c("#C6E2FF", "#63B8FF", "#1E90FF", "#7B68EE", "#D15FEE", "#FF69B4", "#EE3A8C", "#FF0000"))(6)
+colores <- colorRampPalette(c("#C6E2FF", "#FF0000"))(6)
+
+
+par(mar=c(5,16,4,4))
+image(t(image_climate), col=paste(colores, 90, sep=""), axes=F)
 image(t(image_climate_rank), axes=F, col=paste(colores, 99, sep=""), xlim=c(0,1.3))
 axis(1, at=(seq(0,1,by=1/36)), labels=colnames(image_climate_rank), las=2)
 axis(2, at=(seq(0,1,by=1/20)), labels=rownames(image_climate_rank), las=2)
 #axis(4, at=(seq(0,1,by=1/20)), labels=rowsum(image_climate_rank, ), las=2)
 for (x in 1:ncol(image_climate_rank)){
+  counter <- 0
   for (y in 1:nrow(image_climate_rank)){
     extemes<- c(max(t(image_climate_rank)[,y], na.rm=T), min(t(image_climate_rank)[,y], na.rm=T))
-    text((x-1)/36, (y-1)/20, t(image_climate_rank)[x,y], cex=ifelse(is.na(sum(match(t(image_climate_rank)[x,y],extemes))),0.3, 0.9))
+    text((x-1)/36, ((y-1)/20)+0.01, t(image_climate_rank)[x,y], cex=ifelse(is.na(sum(match(t(image_climate_rank)[x,y],extemes))),0.3, 0.9))
+    text((x-1)/36, ((y-1)/20)-0.01, t(image_climate_n)[x,y], cex=0.5)
+    #counter <- counter + 1
     #print(sum(match(t(image_climate_rank)[x,y],extemes)))
   }
 }
@@ -67,9 +79,43 @@ min(as.vector(na.omit(image_climate)))
 which(image_climate == min(image_climate), arr.ind = TRUE)
 min(image_climate,na.rm=T)
 max(image_climate,na.rm=T)
+
+###################################
+### Alex: dating error and bins ###
+###################################
+bins_5to0 <- c(seq(50000, 22000, by=-2000), seq(21000, 0, by=-1000))
+bins_0to5 <- c(seq(0, 21000,by=1000),seq(22000,52000, by=2000))
+for (s in seq_along(Single_sp)){
+  temp_DB_climate <- Full_DB_LL[which(Full_DB_LL$Species==Single_sp[s]),]
+  temp_DB_sort <- temp_DB_climate[order(temp_DB_climate$Mean_Age),]
+  plot(x=temp_DB_sort$Mean_Age, y=seq(1,length(temp_DB_sort$Median_Age),by=1), xlim=c(0,55000), pch=19, frame.plot=F,cex=0.2, yaxt="n",xaxt="n", ylab="", xlab="", xaxs="i", yaxs="i", main=Single_sp[s])
+  h<-hist(temp_DB_sort$Mean_Age, breaks=bins_0to5, freq=T, col="#63B8FF80", border="white", add=T)
+  axis(1,at=bins_0to5, las=2)
+  axis(2,at=c(0, max(h$counts)))
+  segments(x0=(temp_DB_sort$Mean_Age)-(temp_DB_sort$Cal_Sigma),y0=seq(1,length(temp_DB_sort$Median_Age),by=1), x1=(temp_DB_sort$Mean_Age)+(temp_DB_sort$Cal_Sigma))
+  points(x=temp_DB_sort$Median_Age, y=seq(1,length(temp_DB_sort$Median_Age),by=1),col="red", pch=19, cex=0.3)
+}
+  
+
+
+
+time <-  c(seq(50000, 22000, by=-2000), seq(21000, -1000, by=-1000))
+height <- rep(1,times=length(time))
+frame <- cbind(height, time)
+barplot(rep(2,times=38), height=height, space=0, col="#63B8FF60", border="white")
+
+
 ##############################
 ### Alex: Correlate to BSP ###
 ##############################
+x <- stats::runif(12); y <- stats::rnorm(12)
+i <- order(x, y); x <- x[i]; y <- y[i]
+plot(x,y, main = "arrows(.) and segments(.)")
+## draw arrows from point to point :
+s <- seq(length(x)-1)  # one shorter than data
+arrows(x[s], y[s], x[s+1], y[s+1], col = 1:3)
+s <- s[-length(s)]
+segments(x[s], y[s], x[s+2], y[s+2], col = "pink")
 
 ### Plot velocity profile per time bin
 #setwd("/Users/afr/Desktop/Evolution_ppt")
@@ -79,7 +125,7 @@ max(image_climate,na.rm=T)
 #lines(bsp_raw$Time, log(bsp_raw$Mean), lty=2)
 #par(new=TRUE)
 
-
+length(bp$n)
 
 
 
