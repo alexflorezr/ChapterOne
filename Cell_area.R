@@ -1,3 +1,4 @@
+setwd("~/Desktop/PhD/Thesis/2ndChapter/Simulation_Data/")
 # examples for latitude
 # Uses the latitude of the midpoint of a cell, e.g. 55.5 for a cell with Denmark in it
 cellsurfarea <- function(latitude, cellsize.lat = 1, cellsize.long = cellsize.lat) {
@@ -5,7 +6,7 @@ cellsurfarea <- function(latitude, cellsize.lat = 1, cellsize.long = cellsize.la
     return(deg*pi/180)
   surfarea <- function(R,lambda1, lambda2,phi1, phi2) 
     return(R^2 * (lambda2-lambda1) * (sin(phi2) - sin(phi1)))
-  R <- 6731.007178
+  R <- 6378.16
   return(surfarea(R, degtorad(1 * cellsize.long), degtorad(0), degtorad(latitude + 0.5 * cellsize.lat), degtorad(latitude - 0.5 * cellsize.lat))) 
 }
 
@@ -22,7 +23,7 @@ area_matrix <- matrix(ncol=4, nrow=(cols*rows))
 colnames(area_matrix) <- c("Cell", "Lat", "Lon", "Area")
 area_matrix[,c(1,2,3)] <- cbind(seq(1,cols*rows, by=1), rep(seq((cols/2*-1)+.5,cols/2-.5, by=1), times=rows), rep(seq((rows/2*-1)+.5,(rows/2)-.5, by=1), each=cols))
 for (i in seq_along(rownames(as.matrix(cellareas)))){
- [which(abs(area_matrix[,3]) == as.numeric(rownames(as.matrix(cellareas))[i])),4] <- as.matrix(cellareas)[i]
+  area_matrix[which(abs(area_matrix[,3]) == as.numeric(rownames(as.matrix(cellareas))[i])),4] <- as.matrix(cellareas)[i]
 }
 write.table(x=area_matrix, file="surface_area.txt", sep="\t")
 #create a matrix to map the area as an image
