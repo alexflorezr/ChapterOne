@@ -6,7 +6,7 @@ cellsurfarea <- function(latitude, cellsize.lat = 1, cellsize.long = cellsize.la
     return(deg*pi/180)
   surfarea <- function(R,lambda1, lambda2,phi1, phi2) 
     return(R^2 * (lambda2-lambda1) * (sin(phi2) - sin(phi1)))
-  R <- 6378.16
+  R <- 6378.1
   return(surfarea(R, degtorad(1 * cellsize.long), degtorad(0), degtorad(latitude + 0.5 * cellsize.lat), degtorad(latitude - 0.5 * cellsize.lat))) 
 }
 
