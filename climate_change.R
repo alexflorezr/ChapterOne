@@ -224,7 +224,7 @@ for (y in 1:14){
 #layout.show(ln)
 #plot.new()
 #### Plot image using all the values NO LAYOUT, add=T#####
-colores_biomes <- terrain.colors(33)
+colores_biomes <- terrain.colors(33, alpha=0.7)
 ln<- layout(as.matrix(cbind(c(1,1,1), c(1,1,1),c(2,2,1))), heights=c(70,10,35),widths=(c(30,70,25)))
 #plot.new()
 par(mar=c(5,14,5,6))
