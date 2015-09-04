@@ -7,9 +7,17 @@ bins_length<- c(rep(1000, ))
 library(raster)
 library(rgdal)
 # Upload the climate velocity files
-setwd("/Users/afr/Desktop/Koppen_full_cor/")
-#velocity_map_year <- stack("climate_change_velocity_perYear_tmp_prec_rescaled_everyKyrs_truncated_0_00005.grd")
-kop_list <- dir()
+setwd("/Users/afr/Desktop/Regression/Cli_vel/")
+cli_vel_Tmp <- stack("climate_change_velocity_perYear_tmp_rescaled_truncated_0_000005.grd")
+cli_vel_Prc <- stack("climate_change_velocity_perYear_prec_rescaled_truncated_0_000005.grd")
+cli_vel_TnP <- stack("climate_change_velocity_perYear_tmp_prec_rescaled_truncated_0_000005.grd")
+# Upload the biomes files
+setwd("/Users/afr/Desktop/Regression/Biomes/Koppen_full_cor/")
+biome_kpp <- stack(dir())
+setwd("/Users/afr/Desktop/Regression/Biomes/Bio4_CO2/")
+biome_bio <- stack(dir())
+
+stack("climate_change_velocity_prec_everyKyrs.grd")
 #kop_list_50 <- kop_list[1:37]
 koppen <- stack(kop_list)
 # Define the directory where the files
@@ -108,6 +116,8 @@ for (points in seq_along(points_plot$Biome)){
 
 
 plot(points_plot$Time_bin,as.numeric(points_plot$Latitude), col=ifelse(points_plot$Rec_type== "Seq", "#00688B", "#4F4F4F"), pch=19, cex=ifelse(points_plot$Rec_type== "Seq", 1.5, 0.5))
+plot(points_plot$Time_bin,as.numeric(points_plot$), col=ifelse(points_plot$Rec_type== "Seq", "#00688B", "#4F4F4F"), pch=19, cex=ifelse(points_plot$Rec_type== "Seq", 1.5, 0.5))
+
 
 
 
