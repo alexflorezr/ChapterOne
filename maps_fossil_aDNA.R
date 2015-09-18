@@ -25,7 +25,7 @@ Full_DB_map <- cbind(Full_DB_LL, For_map)
 ### maps: species together ###
 ##############################
 
-library(rworldmap)
+library(rworldmap) 
 points_colors <- c("#8B4513","#8B5A00","#D2691E","#EE7600","#FFA500","#CDCD00","#9ACD32","#43CD80","#008B45", "#006400")
 points_time  <- seq(50000, 5000, by=-5000)
 points_table <- cbind(points_colors, points_time)
@@ -48,10 +48,29 @@ points(Full_DB_map$Longitude, Full_DB_map$Latitude, col=Full_DB_map$Map_color, c
 ##############################
 ### maps: one  per  species###
 ##############################
-Single_sp <- unique(Full_DB_LL$Species)
+library(r)
+Single_sp <- "Coelodonta_antiquitatis"
+s <- "Coelodonta_antiquitatis"
 for (s in Single_sp){
   newmap <- getMap(resolution = "low")
-  plot(newmap, xlim = c(-180, 180), ylim = c(0,90), asp=1, main=paste(s, ": fossil (n = ", sum( Full_DB_map$Map_type[Full_DB_map$Species == s] == 21),")", ", aDNA (n = ",sum(Full_DB_map$Map_type[Full_DB_map$Species == s] == 24), ")", sep=""), )
-  points(Full_DB_map$Longitude[Full_DB_map$Species == s], Full_DB_map$Latitude[Full_DB_map$Species == s], col=Full_DB_map$Map_color[Full_DB_map$Species == s], cex=1, pch=as.numeric(Full_DB_map$Map_type[Full_DB_map$Species == s]), bg=paste(Full_DB_map$Map_color[Full_DB_map$Species == s], 90, sep="")) 
+  plot(newmap, xlim = c(-180, 180), ylim = c(0,90), asp=1)
+  mtext(side=3,paste(s, ": fossil (n = ", sum( Full_DB_map$Map_type[Full_DB_map$Species == s] == 21),")", ", aDNA (n = ",sum(Full_DB_map$Map_type[Full_DB_map$Species == s] == 24), ")", sep=""), line=-10)
+  points(Full_DB_map$Longitude[Full_DB_map$Species == s], Full_DB_map$Latitude[Full_DB_map$Species == s], bg=paste(Full_DB_map$Map_color[Full_DB_map$Species == s], 90, sep=""), cex=1, pch=as.numeric(Full_DB_map$Map_type[Full_DB_map$Species == s]), col=ifelse(Full_DB_map$Map_type[Full_DB_map$Species == s] == "24", "black", NA)) 
 }
-############Delete above this line #####
+library(maps)
+install.packages("mapdata")
+library(mapdata)
+map('worldHires', c("usa", "canada", "spain"), location ="europe")
+map(xlim=c(-180,180), ylim=c(30, 90))
+############Delete below this line #####
+
+
+temp_sp_db <- Full_DB[which(Full_DB$Species == s),]
+temp_hist_rec <- hist(temp_sp_db$Mean_Age, labels=T, breaks=seq(0, 71000, 2000), plot=F)
+temp_hist_rec$counts[which(temp_hist_rec$counts == 0)] <- NA
+hist(temp_sp_db$Mean_Age, labels=as.character(temp_hist_rec$counts) , breaks=seq(0, 71000, 2000), xlab="Time", main=NULL, xaxs="i", yaxs="i")
+mtext(side=3, s, line=1)
+temp_hist_seq <- hist(temp_sp_db$Mean_Age[nchar(temp_sp_db$Sequence) > 1], labels=T,breaks=seq(0, 71000, 2000), plot=F )
+temp_hist_seq$counts[which(temp_hist_seq$counts == 0)] <- NA
+hist(temp_sp_db$Mean_Age[nchar(temp_sp_db$Sequence) > 1],breaks=seq(0, 71000, 2000), add=T, col="#838B8B")
+text(x=temp_hist_seq$mids, y=0.5, labels=as.character(temp_hist_seq$counts), col="white", cex=0.7)

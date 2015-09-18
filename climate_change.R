@@ -9,7 +9,7 @@ bins_length<- c(rep(1000, ))
 library(raster)
 # Upload the climate velocity files
 setwd("/Users/afr/Desktop/CHECK/Ditte_files/Velocity/paleo_cc_velocity/")
-velocity_map_year <- stack("climate_change_velocity_perYear_tmp_prec_rescaled_everyKyrs_truncated_0_00005.grd")
+velocity_map_year <- stack("climate_change_velocity_perlYear_tmp_prec_rescaled_everyKyrs_truncated_0_00005.grd")
 # Define the directory where the files
 setwd("/Users/afr/Desktop/Evolution_ppt/Corr_result/")
 image_climate <- matrix(NA,ncol=42, nrow=21)
@@ -405,17 +405,17 @@ par(mar=c(5,13,0,2))
 image(t(image_climate_rank[,6:42]), axes=F, col=paste(colores, 99, sep=""))
 axis(1, at=(seq(0,1,by=1/36)), labels=colnames(image_climate_rank[,6:42]), las=2)
 axis(2, at=(seq(0,1,by=1/20)), labels=rownames(image_climate_rank), las=2)
-#axis(4, at=(seq(0,1,by=1/20)), labels=rowsum(image_climate_rank, ), las=2)
-#for (x in 1:ncol(image_climate_rank)){
- # counter <- 0
- # for (y in 1:nrow(image_climate_rank)){
-   # extemes<- c(max(t(image_climate_rank[,6:42])[,y], na.rm=T), min(t(image_climate_rank[,6:42])[,y], na.rm=T))
-    #text((x-1)/36, ((y-1)/20)+0.01, t(image_climate_rank[,6:42])[x,y], cex=ifelse(is.na(sum(match(t(image_climate_rank[,6:42])[x,y],extemes))),0.3, 0.9))
-    #text((x-1)/36, ((y-1)/20)-0.01, t(image_climate_n[,6:42])[x,y], cex=0.5)
-    #counter <- counter + 1
-    #print(sum(match(t(image_climate_rank)[x,y],extemes)))
-  #}
-#}
+axis(4, at=(seq(0,1,by=1/20)), labels=rowsum(image_climate_rank, ), las=2)
+for (x in 1:ncol(image_climate_rank)){
+  counter <- 0
+  for (y in 1:nrow(image_climate_rank)){
+    extemes<- c(max(t(image_climate_rank[,6:42])[,y], na.rm=T), min(t(image_climate_rank[,6:42])[,y], na.rm=T))
+    text((x-1)/36, ((y-1)/20)+0.01, t(image_climate_rank[,6:42])[x,y], cex=ifelse(is.na(sum(match(t(image_climate_rank[,6:42])[x,y],extemes))),0.3, 0.9))
+    text((x-1)/36, ((y-1)/20)-0.01, t(image_climate_n[,6:42])[x,y], cex=0.5)
+    counter <- counter + 1
+  print(sum(match(t(image_climate_rank)[x,y],extemes)))
+  }
+}
 par(mar=c(0,0,0,0))
 plot.new()
 legend.gradient(cbind(c(0,0.5,0.5,0), c(1,1,0.5,0.5)), cols=paste(colores, 99, sep=""), limits=c("Slowest", "Fastest"), title="Ranking")
@@ -681,4 +681,66 @@ temp_ccf <- ccf(temp_time_cli$Median_vel_clim, as.numeric(temp_time_cli$slope_bs
 str(mp_ccf)
 lag.plot(temp_time_cli$Median_vel_clim, 9)
 lag.plot(as.numeric(mp_time_cli$slope_bsp))
+#########################################################################################################################
+#########################################################################################################################
+##### Estimate the regional climate change on the holarctic region (Background climate change)
+## TODO ## Convert this part of the script in a function
+#########################################################################################################################
+setwd("/Users/afr/Desktop/Regression/Cli_vel/")
+cli_vel_Tmp <- stack("climate_change_velocity_perYear_tmp_rescaled_truncated_0_000005.grd")
+cli_vel_Prc <- stack("climate_change_velocity_perYear_prec_rescaled_truncated_0_000005.grd")
+cli_vel_TnP <- stack("climate_change_velocity_perYear_tmp_prec_rescaled_truncated_0_000005.grd")
 
+library(raster)
+e <- extent(-180,180,30, 90)
+cropped <- crop(cli_vel_Tmp, e)
+
+
+cli_vel_tmp_hol <- as.data.frame(matrix(ncol=3, nrow=0))
+for (layer in 25:61){
+  cli_vel_tmp_hol<- rbind(cli_vel_tmp_hol, cbind(extract(cropped[[layer]], e), rep(bins_50to0[layer-24], times=21600)))
+}
+plot(cli_vel_tmp_hol)
+cli_vel_prc_hol[which((cli_vel_prc_hol[,2] <= 50000 & cli_vel_prc_hol[,2] >= 24000)),3] <- "PreLGM"
+cli_vel_prc_hol[which((cli_vel_prc_hol[,2] <= 22000 & cli_vel_prc_hol[,2] >= 10000)),3] <- "LGM"
+cli_vel_prc_hol[which((cli_vel_prc_hol[,2] <= 9000 & cli_vel_prc_hol[,2] >= 0)),3] <- "Holocene"
+cli_vel_prc_hol_na <- na.omit(cli_vel_prc_hol)
+boxplot(log(cli_vel_prc_hol_na[,1]) ~ cli_vel_prc_hol_na[,3])
+    
+
+plot(cli_vel_prc_hol[,2],cli_vel_prc_hol[,1])
+plot(cli_vel_prc_hol[,2],log(cli_vel_prc_hol[,1]))
+boxplot(log(cli_vel_prc_hol[,1]) ~ cli_vel_prc_hol[,2])
+ccf(cli_vel_prc_hol_na[,1], cli_vel_prc_hol_na[,2])
+mean.default(!is.na(cli_vel_holarctic[,1]))
+boxplot.default(log(cli_vel_holarctic))
+meancol <- as.data.frame((colMeans(na.omit(cli_vel_holarctic))))
+plot(meancol[,1], at=seq_along(rownames(meancol)),labels=rownames(meancol))
+)
+######
+cropped_tmp <- crop(cli_vel_Tmp, e)
+cli_vel_holarctic_tmp <- as.data.frame(matrix(ncol=3, nrow=0))
+for (layer in 25:61){
+  cli_vel_holarctic_tmp <- rbind(cli_vel_holarctic_tmp, cbind(extract(cropped_tmp[[layer]], e), rep(bins_50to0[layer-24], times=18000)))
+}
+
+me
+
+plot(cli_vel_holarctic[,1])
+
+
+kk <- extract(cropped[[layer]], e)
+bp_all <- boxplot(cli_vel_holarctic[,1] ~ cli_vel_holarctic[,2])
+bp_all_tmp <- boxplot(cli_vel_holarctic_tmp[,1] ~ cli_vel_holarctic_tmp[,2])
+plot(as.numeric(bp_all_tmp$names),bp_all_tmp$stats[3,])
+cor(log(bp_all_tmp$stats[3,2:37]), bp_BSP$stats[3,])
+ccf((log(bp_all_tmp$stats[3,2:37]), bp_BSP$stats[3,]))
+lag2.plot(log(bp_all_tmp$stats[3,2:37]), bp_BSP$stats[3,])
+cor.test(log(bp_all_tmp$stats[3,2:37]), bp_BSP$stats[3,])
+ccf(log(bp_all_tmp$stats[3,2:37]), bp_BSP$stats[3,])
+plot(log(bp_all$stats[3,2:37]))
+points(bp_tmp$stats[3,], col="red")
+plot(bp_tmp$stats[3,], col="red")
+
+
+dispersal <- read.delim(file.choose(), header=T, stringsAsFactors=F)
