@@ -65,12 +65,3 @@ map(xlim=c(-180,180), ylim=c(30, 90))
 ############Delete below this line #####
 
 
-temp_sp_db <- Full_DB[which(Full_DB$Species == s),]
-temp_hist_rec <- hist(temp_sp_db$Mean_Age, labels=T, breaks=seq(0, 71000, 2000), plot=F)
-temp_hist_rec$counts[which(temp_hist_rec$counts == 0)] <- NA
-hist(temp_sp_db$Mean_Age, labels=as.character(temp_hist_rec$counts) , breaks=seq(0, 71000, 2000), xlab="Time", main=NULL, xaxs="i", yaxs="i")
-mtext(side=3, s, line=1)
-temp_hist_seq <- hist(temp_sp_db$Mean_Age[nchar(temp_sp_db$Sequence) > 1], labels=T,breaks=seq(0, 71000, 2000), plot=F )
-temp_hist_seq$counts[which(temp_hist_seq$counts == 0)] <- NA
-hist(temp_sp_db$Mean_Age[nchar(temp_sp_db$Sequence) > 1],breaks=seq(0, 71000, 2000), add=T, col="#838B8B")
-text(x=temp_hist_seq$mids, y=0.5, labels=as.character(temp_hist_seq$counts), col="white", cex=0.7)
